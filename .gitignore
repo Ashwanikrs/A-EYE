@@ -1,0 +1,6 @@
+./venv
+./ipynb_checkpoints
+./ui
+./__pycache__
+./data
+./Other
