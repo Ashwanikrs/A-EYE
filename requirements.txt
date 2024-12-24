@@ -6,4 +6,4 @@ numpy~=2.0.2
 matplotlib~=3.9.4
 pyttsx3~=2.98
 keras~=3.7.0
-tensorflow
+tensorflow-cpu==2.12.0
