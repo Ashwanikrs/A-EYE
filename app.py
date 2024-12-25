@@ -29,8 +29,6 @@ def home():
 
 # Handle file upload and caption generation
 @app.route('/generate_caption', methods=['POST'])
-
-@app.route('/generate_caption', methods=['POST'])
 def generate_caption():
     if 'file' not in request.files:
         return "No file part", 400
@@ -40,28 +38,31 @@ def generate_caption():
         return "No selected file", 400
 
     try:
+        # Check filename and secure it
         filename = secure_filename(file.filename)
+        logger.debug(f"Secured filename: {filename}")
+
+        # Construct the file path
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        logger.debug(f"Resolved file path: {file_path}")
 
-        print(f"Saving file to: {file_path}")
+        # Save the file
         file.save(file_path)
+        logger.debug("File save attempted.")
 
-        # Check if the file is accessible
-        if not os.path.exists(file_path):
-            return f"File not found at {file_path}", 500
+        # Verify file existence after saving
+        if os.path.exists(file_path):
+            logger.debug(f"File saved successfully at {file_path}")
+        else:
+            logger.error(f"File save failed. File not found at {file_path}")
+            return f"File save failed. File not found at {file_path}", 500
 
-        print(f"File saved successfully at {file_path}")
-
-        # Generate caption
-        print("Running model for caption generation...")
-        caption = generate.runModel(file_path)
-        print(f"Caption generated: {caption}")
-
-        # Render response
-        return render_template('index.html', filename=filename, caption=caption)
+        # Render image preview and caption generation
+        return render_template('index.html', filename=filename, caption=None)
     except Exception as e:
-        print(f"Error during caption generation: {e}")
+        logger.error(f"Exception during file save or processing: {e}")
         return f"Error: {e}", 500
+
 
 
 
