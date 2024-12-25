@@ -24,7 +24,6 @@ def home():
 
 # Handle file upload and caption generation
 @app.route('/generate_caption', methods=['POST'])
-@app.route('/generate_caption', methods=['POST'])
 def generate_caption():
     if 'file' not in request.files:
         return "No file part"
