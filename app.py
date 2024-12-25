@@ -19,8 +19,12 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Create the upload folder if it doesn't exist
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+if os.access(UPLOAD_FOLDER, os.W_OK):
+    print(f"Write access to {UPLOAD_FOLDER} is available")
+else:
+    print(f"Write access to {UPLOAD_FOLDER} is not available")
 
-print(f"Templates folder path: {os.path.join(BASE_DIR, 'Templates')}")
+print(f"Templates folder path: {os.path.join(BASE_DIR, 'templates')}")
 
 
 # Home route
