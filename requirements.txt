@@ -49,7 +49,7 @@ tensorboard==2.18.0
 tensorboard-data-server==0.7.2
 tensorflow-cpu==2.18.0
 tensorflow-io-gcs-filesystem
-tensorflow_intel==2.18.0
+tensorflow_intel
 termcolor==2.5.0
 typing_extensions==4.12.2
 tzdata==2024.2
