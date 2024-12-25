@@ -41,4 +41,6 @@ def generate_caption():
         return render_template('index.html', filename=filename, caption=caption)
 
 
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=10000)
 
