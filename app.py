@@ -20,6 +20,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
+print(f"Templates folder path: {os.path.join(BASE_DIR, 'templates')}")
 
 # Home route
 @app.route('/')
