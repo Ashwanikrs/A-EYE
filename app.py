@@ -15,12 +15,15 @@ app = Flask(
 # Directory to save uploaded images
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Validate template and static folders
+if not os.path.exists(os.path.join(BASE_DIR, 'templates', 'index.html')):
+    print("Error: index.html is missing in the templates directory!")
+print(f"Templates folder path: {os.path.join(BASE_DIR, 'templates')}")
 
 # Create the upload folder if it doesn't exist
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-print(f"Templates folder path: {os.path.join(BASE_DIR, 'templates')}")
 
 # Home route
 @app.route('/')
