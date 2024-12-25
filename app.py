@@ -3,7 +3,14 @@ from flask import Flask, render_template, request
 from werkzeug.utils import secure_filename
 import generate  # Backend caption generation logic
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Initialize Flask app with flexible paths
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, 'templates'),  # Templates directory
+    static_folder=os.path.join(BASE_DIR, 'static')       # Static files directory
+)
 
 # Directory to save uploaded images
 UPLOAD_FOLDER = 'static/uploads'
