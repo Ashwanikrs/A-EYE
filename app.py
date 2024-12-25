@@ -8,21 +8,19 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Initialize Flask app with flexible paths
 app = Flask(
     __name__,
-    template_folder=os.path.join(BASE_DIR, 'templates'),  # Templates directory
+    template_folder=os.path.join(BASE_DIR, 'Templates'),  # Templates directory
     static_folder=os.path.join(BASE_DIR, 'static')       # Static files directory
 )
 
 # Directory to save uploaded images
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# Validate template and static folders
-if not os.path.exists(os.path.join(BASE_DIR, 'templates', 'index.html')):
-    print("Error: index.html is missing in the templates directory!")
-print(f"Templates folder path: {os.path.join(BASE_DIR, 'templates')}")
 
 # Create the upload folder if it doesn't exist
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+
+print(f"Templates folder path: {os.path.join(BASE_DIR, 'Templates')}")
 
 
 # Home route
