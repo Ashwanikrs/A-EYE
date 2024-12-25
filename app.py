@@ -38,31 +38,28 @@ def generate_caption():
         return "No selected file", 400
 
     try:
-        # Check filename and secure it
         filename = secure_filename(file.filename)
-        logger.debug(f"Secured filename: {filename}")
-
-        # Construct the file path
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        logger.debug(f"Resolved file path: {file_path}")
 
-        # Save the file
+        print(f"Saving file to: {file_path}")
         file.save(file_path)
-        logger.debug("File save attempted.")
 
-        # Verify file existence after saving
-        if os.path.exists(file_path):
-            logger.debug(f"File saved successfully at {file_path}")
-        else:
-            logger.error(f"File save failed. File not found at {file_path}")
-            return f"File save failed. File not found at {file_path}", 500
+        # Check if the file is accessible
+        if not os.path.exists(file_path):
+            return f"File not found at {file_path}", 500
 
-        # Render image preview and caption generation
-        return render_template('index.html', filename=filename, caption=None)
+        print(f"File saved successfully at {file_path}")
+
+        # Generate caption
+        print("Running model for caption generation...")
+        caption = generate.runModel(file_path)
+        print(f"Caption generated: {caption}")
+
+        # Render response
+        return render_template('index.html', filename=filename, caption=caption)
     except Exception as e:
-        logger.error(f"Exception during file save or processing: {e}")
+        print(f"Error during caption generation: {e}")
         return f"Error: {e}", 500
-
 
 
 
