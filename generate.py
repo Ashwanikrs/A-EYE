@@ -1,102 +1,99 @@
+import os
 import json
-from keras.models import load_model
-import pickle
-import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import pandas as pd
+from keras.models import load_model
 from keras.preprocessing.sequence import pad_sequences
-import collections
 from keras.preprocessing import image
-from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
+from keras.applications.resnet50 import ResNet50, preprocess_input
 from keras.models import Model
+import pyttsx3  # For text-to-speech
 
+# Ensure TensorFlow is set to CPU mode only
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-
-# Read the files word_to_idx.pkl and idx_to_word.pkl to get the mappings between word and index
-word_to_index = {}
-with open ("data/textFiles/word_to_idx.pkl", 'rb') as file:
+# Load word-index mappings
+print("Loading word-to-index and index-to-word mappings...")
+with open("data/textFiles/word_to_idx.pkl", 'rb') as file:
     word_to_index = pd.read_pickle(file, compression=None)
 
-index_to_word = {}
-with open ("data/textFiles/idx_to_word.pkl", 'rb') as file:
+with open("data/textFiles/idx_to_word.pkl", 'rb') as file:
     index_to_word = pd.read_pickle(file, compression=None)
 
-
-
-print("Loading the model...")
+# Load the caption generation model
+print("Loading the caption generation model...")
 model = load_model('model_checkpoints/model_14.h5')
 
-resnet50_model = ResNet50 (weights = 'imagenet', input_shape = (224, 224, 3))
-resnet50_model = Model (resnet50_model.input, resnet50_model.layers[-2].output)
+# Load the ResNet50 model for image feature extraction
+print("Loading ResNet50 model...")
+resnet50_model = ResNet50(weights='imagenet', input_shape=(224, 224, 3))
+resnet50_model = Model(resnet50_model.input, resnet50_model.layers[-2].output)
 
-
-
-# Generate Captions for a random image
-# Using Greedy Search Algorithm
 
 def predict_caption(photo):
-
+    """
+    Generate a caption for the given photo using a greedy search algorithm.
+    """
     inp_text = "startseq"
 
-    #max_len = 80 which is maximum length of caption
-    for i in range(80):
+    for _ in range(80):  # Maximum caption length
         sequence = [word_to_index[w] for w in inp_text.split() if w in word_to_index]
         sequence = pad_sequences([sequence], maxlen=80, padding='post')
 
-        ypred = model.predict([photo, sequence])
+        ypred = model.predict([photo, sequence], verbose=0)  # Disable progress logging
         ypred = ypred.argmax()
-        word = index_to_word[ypred]
+        word = index_to_word.get(ypred, None)
 
-        inp_text += (' ' + word)
-
-        if word == 'endseq':
+        if word is None or word == 'endseq':
             break
 
-    final_caption = inp_text.split()[1:-1]
-    final_caption = ' '.join(final_caption)
+        inp_text += ' ' + word
+
+    # Remove startseq and endseq tokens
+    final_caption = ' '.join(inp_text.split()[1:-1])
     return final_caption
 
 
-
-def preprocess_image (img):
-    img = image.load_img(img, target_size=(224, 224))
+def preprocess_image(img_path):
+    """
+    Preprocess an image to meet ResNet50 input requirements.
+    """
+    img = image.load_img(img_path, target_size=(224, 224))
     img = image.img_to_array(img)
-
-    # Convert 3D tensor to a 4D tendor
-    img = np.expand_dims(img, axis=0)
-
-    #Normalize image accoring to ResNet50 requirement
-    img = preprocess_input(img)
-
+    img = np.expand_dims(img, axis=0)  # Convert 3D tensor to 4D tensor
+    img = preprocess_input(img)  # Normalize image for ResNet50
     return img
 
 
-# A wrapper function, which inputs an image and returns its encoding (feature vector)
-def encode_image (img):
-    img = preprocess_image(img)
-
-    feature_vector = resnet50_model.predict(img)
-    # feature_vector = feature_vector.reshape((-1,))
+def encode_image(img_path):
+    """
+    Encode an image into a feature vector using ResNet50.
+    """
+    img = preprocess_image(img_path)
+    feature_vector = resnet50_model.predict(img, verbose=0)  # Disable progress logging
     return feature_vector
 
 
-
-import pyttsx3  # For text-to-speech
-
-# Add the following function to the end of generate.py
 def text_to_speech(text):
+    """
+    Convert text to speech using pyttsx3.
+    """
     engine = pyttsx3.init()
     engine.setProperty('rate', 150)  # Speech rate
     engine.setProperty('volume', 0.9)  # Volume level
     engine.say(text)
     engine.runAndWait()
 
+
 def runModel(img_name):
-    print("Encoding the image ...")
+    """
+    Main function to encode the image, generate a caption, and return it.
+    """
+    print("Encoding the image...")
     photo = encode_image(img_name).reshape((1, 2048))
 
     print("Running model to generate the caption...")
     caption = predict_caption(photo)
 
     print("Generated Caption:", caption)
-    return caption  # Return the caption to the frontend
+    return caption
